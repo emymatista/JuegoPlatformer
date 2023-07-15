@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Levels/Level3.unity
     guid: f8b63bfe734768d4ebf3d0b70383be4b
+  - enabled: 1
+    path: Assets/Levels/WinningScreen.unity
+    guid: 8f6739670c7808c41bf6fb56d1740299
   m_configObjects: {}
