@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Health : MonoBehaviour
 {
@@ -14,6 +15,15 @@ public class Health : MonoBehaviour
     [SerializeField] private float iFramesDuration;
     [SerializeField] private int numberOfFlashes;
     private SpriteRenderer spriteRend;
+
+    [Header ("Components")]
+    [SerializeField] private Behaviour[] components;
+
+    [Header ("Death Sound")]
+    [SerializeField] private AudioClip deathSound;
+    [SerializeField] private AudioClip hurtSound;
+
+    public float delay = 3.5f;
 
     private void Awake()
     {
@@ -30,22 +40,63 @@ public class Health : MonoBehaviour
         {
             anim.SetTrigger("hurt");
             StartCoroutine(Invunerability());
+            SoundManager.instance.PlaySound(hurtSound);
         }
         else
         {
             if(!dead)
             {
+                /*
+                //Player
+                if(GetComponent<PlayerMovement>() != null)
+                    GetComponent<PlayerMovement>().enabled = false;
+
+                //Enemy
+                if(GetComponent<EnemyPatrol>() != null)
+                    GetComponent<EnemyPatrol>().enabled = false;
+
+                if(GetComponent<MeleeEnemy>() != null)
+                    GetComponent<MeleeEnemy>().enabled = false;
+                */
+
+                //Deactivate all attached components
+                foreach(Behaviour component in components)
+                    component.enabled = false;
+                
+                anim.SetBool("Grounded", true);
                 anim.SetTrigger("die");
-                GetComponent<PlayerMovement>().enabled = false;
+
                 dead = true;
+                SoundManager.instance.PlaySound(deathSound);
+                StartCoroutine(LoadFirstLevel());
             }
         }
+    }
+
+    private IEnumerator LoadFirstLevel()
+    {
+        yield return new WaitForSeconds(delay);
+
+        SceneManager.LoadScene(0);
     }
 
     public void AddHealth(float _value)
     {
         currentHealth = Mathf.Clamp(currentHealth + _value, 0, startingHealth);
     }  
+
+    public void Respawn()
+    {
+        dead = false;
+        AddHealth(startingHealth);
+        anim.ResetTrigger("die");
+        anim.Play("Idle");
+        StartCoroutine(Invunerability());
+
+        //Activate all attached components
+                foreach(Behaviour component in components)
+                    component.enabled = true;
+    }
     
     private IEnumerator Invunerability()
     {
@@ -58,5 +109,10 @@ public class Health : MonoBehaviour
             yield return new WaitForSeconds(iFramesDuration / (numberOfFlashes * 2));
         }
         Physics2D.IgnoreLayerCollision(10, 11, false);
+    }
+
+    private void Deactivate()
+    {
+        gameObject.SetActive(false);
     }
 }

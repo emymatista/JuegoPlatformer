@@ -8,6 +8,7 @@ public class PlayerAttack : MonoBehaviour
     private Animator anim;
     private PlayerMovement playerMovement;
     private float cooldownTimer = Mathf.Infinity;
+    [SerializeField] private AudioClip swordSound;
 
     private void Awake()
     {
@@ -17,7 +18,7 @@ public class PlayerAttack : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetMouseButton(0) && cooldownTimer > attackCooldown && playerMovement.canAttack())
+        if(Input.GetKey(KeyCode.L) && cooldownTimer > attackCooldown && playerMovement.canAttack())
            Attack();
         
         cooldownTimer += Time.deltaTime;
@@ -25,7 +26,10 @@ public class PlayerAttack : MonoBehaviour
 
     private void Attack()
     {
+        
+        SoundManager.instance.PlaySound(swordSound);
         anim.SetTrigger("attack2");
         cooldownTimer = 0;
+        
     }
 }
